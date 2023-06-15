@@ -1,0 +1,63 @@
+
+{% extends 'ecommerce/template.html' %}
+
+{% block content %}
+    <div id="shopping-cart" class="mx-auto p-10 py-20 rounded-xl w-[80%] min-w[320px] min-h-[80vh]">
+            <div class="flex justify-between">
+                <h2 class="font-bold text-4xl text-gray-600">
+                    Shopping Cart
+                </h2>
+                <form method="POST" action="{% url 'ecommerce:checkout' %}">
+                    {% csrf_token %}
+                    <button id="checkout-button" class="w-56"><i class="fas fa-check"></i> &nbsp; Complete Checkout</button>
+                </form>
+            </div>
+            {% if message %}
+                <h2 class="text-green-600 font-bold text-2xl my-20 text-center">{{ message }}</h2>
+            {% endif %}
+            {% if cart_items %}
+                {% for item in cart_items %}
+                    <div class="w-full flex items-center shadow-lg gap-5 px-10 py-10">
+                        <div class="h-40 w-56 overflow-hidden bg-contain bg-center bg-no-repeat" style="background-image: url('/media/images/products/2022/06/02/71rXSVqET9L._AC_SL1257_.jpg')"></div>
+                        <div class="">
+                            <h2 class="font-bold text-gray-600">
+                                {{ item.product.name }}
+                            </h2>
+                            <div>
+                                <form action="{% url 'ecommerce:cart' %}" method="POST">
+                                    {% csrf_token %}
+                                    <input name="_method" value="PUT" type="hidden" />
+                                    <input name="product_id" type="hidden" value="{{ item.product_id }}" />
+                                    <div class="flex items-end">
+                                        <div>
+                                            <label for="quantity">Quantity:</label>
+                                            <br/>
+                                            <input name="quantity" id="quantity" type="number" class="quantity-input bg-gray-200 w-full rounded-l-lg w-36" value="{{ item.quantity }}" />
+                                        </div>
+                                        <button class="w-20 h-11 rounded-none rounded-r-lg">save</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+    </div>
+    <script>
+        const checkButton = document.querySelector('#checkout-button')
+        const setCheckoutDisabled = () => {
+            checkButton.setAttribute('disabled', 'true')
+            checkButton.setAttribute('class', 'bg-red-200 text-gray-700 hover:bg-gray-200 cursor-not-allowed w-56')
+            checkButton.innerHTML = 'Save Your Changes First'
+        }
+        const cartContainer = document.querySelector('#shopping-cart')
+        const events = ['keypress', 'change']
+        events.forEach((event) => {
+            cartContainer.addEventListener(event, (e) => {
+                if(e.target.classList.contains('quantity-input')) {
+                    setCheckoutDisabled();
+                }
+            })
+        })
+    </script>
+{% endblock %}

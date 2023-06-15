@@ -1,0 +1,135 @@
+<html>
+    <head>
+        <title>
+            Work Logger App
+        </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+
+            body {
+                background: #47c4ff;
+                display: flex;
+                flex-display: column;
+                justify-content: center;
+                font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
+            }
+
+            * {
+                padding: 0;
+            }
+
+            .form {
+                display: flex;
+                justify-content: start;
+                flex-direction: row;
+                flex-wrap: wrap;
+                width: fit-content;
+                gap: 10px;
+            }
+
+            .errorlist {
+                color: red;
+            }
+
+            table {
+              border-collapse: collapse;
+              width: 100%;
+            }
+
+            th, td {
+              text-align: left;
+              padding: 8px;
+            }
+
+            .container {
+                width: clamp(320px, 100%, 1276px);
+                margin: auto;
+                background: white;
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
+                padding: 4em 2em;
+                border-radius: 2rem;
+            }
+
+            tr:nth-child(even) {background-color: #f2f2f2;}
+        </style>
+    </head>
+    <body>
+        <main class="container">
+            <h4>
+                Hello {{ user.username }}!
+                <a href="{% url 'users:logout' %}">Logout</a>
+            </h4>
+            <div class="errorlist">
+                {{ error_message }}
+                <br/><br/>
+            </div>
+            <form method="POST" class="form">
+                {% csrf_token %}
+                {{ form }}
+                <input type="submit" value="Save" />
+            </form>
+            <h4>
+                TOTAL HOURS LOGGED TODAY: {{ today_hours }} hour{{ today_hours|pluralize }}
+            </h4>
+            <h4>
+                TOTAL HOURS LOGGED THIS WEEK: {{ week_hours }} hour{{ week_hours|pluralize }}
+            </h4>
+            <h4>
+                TOTAL HOURS LOGGED THIS MONTH: {{ month_hours }} hour{{ month_hours|pluralize }}
+            </h4>
+            <table id="logsTable">
+                <thead>
+                    <tr style="text-transform: uppercase; font-weight: bolder">
+                        <th>duration</th>
+                        <th>Project</th>
+                        <th>remarks</th>
+                    </tr>
+                </thead>
+                <!-- !DONT REMOVE THIS '<tbody>' BECAUSE IT IS RELATED TO JAVASCRIPT -->
+                <tbody></tbody>
+            </table>
+        </main>
+
+        <script>
+
+            const logsTable = document.getElementById('logsTable')
+            const logsDateField = document.getElementById('id_day')
+
+            const row_template = ({duration, project, remarks}) => `
+                <tr>
+                    <td>${duration}</td>
+                    <td>${project}</td>
+                    <td>${remarks}</td>
+                </tr>
+            `
+
+            const getLogs = async (date) => {
+                return fetch(`logs?day=${date}`).then(res => res.json()).catch(console.err)
+            }
+
+            const renderLogs = async (field) => {
+
+                const res = await getLogs(field.value)
+                if(!Array.isArray(res))
+                    return
+
+                const container =  logsTable.querySelector('tbody')
+
+                // empty the table body contents and render new data
+                container.innerHTML = ''
+                res.forEach((item, idx) => {
+                    container.innerHTML += row_template(item['fields'])
+                })
+
+            }
+
+            // if value of date is set in POST request show its logs else use today's date
+            if(!logsDateField.value) logsDateField.valueAsDate  = new Date()
+
+            renderLogs(logsDateField)
+
+            logsDateField.addEventListener('change', async (e) => renderLogs(e.target))
+
+        </script>
+    </body>
+</html>

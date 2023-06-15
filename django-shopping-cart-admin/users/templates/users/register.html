@@ -1,0 +1,21 @@
+{% extends 'ecommerce/template.html' %}
+
+{% block content %}
+    <div class="mx-auto p-10 py-20 shadow-lg rounded-xl w-[60%] min-w[320px]">
+        <form method="POST" class="flex flex-col gap-5 text-lg">
+            {% csrf_token %}
+            {{ form }}
+            <hr />
+{#            {% for form in address_form_set %}#}
+{#                {% if forloop.counter == 1 %}#}
+{#                    <h2 class="font-bold text-2xl text-gray-500">Shipping Address</h2>#}
+{#                {% else %}#}
+{#                    <h2 class="font-bold text-2xl text-gray-500">Billing Address</h2>#}
+{#                {% endif %}#}
+{#                {{ form }}#}
+{#            {% endfor %}#}
+            {{ address_form_set }}
+            <input type="submit" value="Login"/>
+        </form>
+    </div>
+{% endblock %}

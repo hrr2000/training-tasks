@@ -1,0 +1,60 @@
+
+{% extends 'ecommerce/template.html' %}
+
+{% block content %}
+    <div class="mx-auto p-10 py-20 rounded-xl w-[80%] min-w[320px] shadow-lg min-h-[80vh]">
+            <h2 class="font-bold text-4xl text-gray-600">
+                {{ product.name }}
+            </h2>
+            <div class="p-10">
+                <div class="h-56 w-full overflow-hidden bg-contain bg-center bg-no-repeat" style="background-image: url('{{ product.images.first.image.url }}')"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-10 px-20 mt-10">
+                <div class="col-span-2">
+                    <h4 class="font-bold text-2xl text-gray-600">
+                        Description:
+                    </h4>
+                    <p class="w-full text-lg my-5 mx-1 text-gray-600">
+                        {{ product.description }}
+                    </p>
+                </div>
+                <div>
+                    <span class="font-bold text-2xl text-gray-500">
+                        <i class="fas fa-truck"></i> {{ product.stock }} Piece{{ product.stock|pluralize }} Left
+                    </span>
+                    <span class="block my-2 text-4xl py-4 text-blue-500 w-[fit-content] h-[fit-content] rounded-lg">
+                        <span class="font-bold">
+                            Price:
+                        </span>
+                        <span>
+                            {{ product.currency.symbol }}{{ product.price }}
+                        </span>
+                    </span>
+                    {% if request.user.is_authenticated %}
+                            {% if product.stock > 0 %}
+                                <form action="{% url 'ecommerce:cart' %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="_method" value="POST" />
+                                    <label for="quantity">Quantity:</label>
+                                    <input name="quantity" id="quantity" type="number" class="bg-gray-200 w-full my-2 rounded-lg" value="1" />
+                                    <input name="product_id" type="hidden" value="{{ product.pk }}" />
+                                    <button class="mt-2 w-full"><i class="fas fa-shopping-cart"></i> Add To Cart</button>
+                                </form>
+                            {% else %}
+                                <button disabled class="bg-gray-200 mt-5 text-gray-700 hover:bg-gray-200 cursor-not-allowed w-full">Out Of Stock</button>
+                            {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            <h4 class="font-bold text-2xl text-gray-600 px-20 mt-10">
+                Gallery
+            </h4>
+            <div class="grid grid-cols-5 px-20">
+                {% for product_image in product.images.all %}
+                    <div class="p-5 shadow-md m-5">
+                        <div class="h-32 w-full overflow-hidden bg-contain bg-center bg-no-repeat" style="background-image: url('{{ product_image.image.url }}')"></div>
+                    </div>
+                {% endfor %}
+            </div>
+    </div>
+{% endblock %}
